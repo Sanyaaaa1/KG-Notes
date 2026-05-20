@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Graph — Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<!--For future case <link rel="icon" href=image/favicon.ico>--> 
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+<div id="modal-overlay">
+  <div id="modal-box">
+    <p id="modal-message"></p>
+    <div id="modal-buttons"></div>
+  </div>
+</div>
+
+<div id="graph-overlay">
+    <div class="topbar">
+        <span class="topbar-logo">KG//Notes</span>
+          <button class="btn-music" id="music-btn" onclick="playMusic()" title="Play music (Ctrl+G)">♪ play</button>
+          <button class="btn" onclick="stop()" title="Stop music (Ctrl+H)">stop</button>
+          <input type="range" class="volume-slider" min="0" max="100" value="10" title="Volume" oninput="syncSliders(this.value); setVolume(this.value)">
+        <div class="topbar-sep"></div>
+        <span class="wiki-link-hint">click nodes to open, drag to rearrange, scroll to zoom</span>
+        <button class="btn" onclick="initGraph()">refresh</button>
+        <button class="btn" onclick="closeGraph()">✕ close</button>
+    </div>
+    <svg id="graph" width="100%" height="100%"></svg>
+</div>
+
+<div class="topbar">
+  <span class="topbar-logo">KG//Notes</span>
+  <button class="btn-music" id="music-btn" onclick="playMusic()" title="Play music (Ctrl+G)">♪ play</button>
+  <button class="btn" onclick="stop()" title="Stop music (Ctrl+H)">stop</button>
+  <input type="range" class="volume-slider" min="0" max="100" value="10" title="Volume" oninput="syncSliders(this.value); setVolume(this.value)">
+  <div class="topbar-sep"></div>
+  <span class="topbar-title" id="topbar-title">untitled</span>
+  <div class="topbar-actions">
+    <span class="save-indicator" id="save-indicator">saved</span>
+    <button class="btn btn-accent" onclick="saveNote()">save</button>
+    <button class="btn" onclick="deleteNote()">delete</button>
+  </div>
+</div>
+
+<div class="workspace">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-label">notes</span>
+      <button class="new-note-btn" onclick="newNote()" title="New note">+</button>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="search notes..." id="search-input" oninput="filterNotes()">
+    </div>
+    <div class="note-list" id="note-list"></div>
+    <div class="sidebar-footer">
+      <button class="graph-btn" onclick="openGraph()">open graph view →</button>
+    </div>
+  </div>
+
+  <div class="editor-area">
+    <div class="editor-toolbar">
+      <button class="tool-btn" onclick="wrap('**','**')" title="Bold">B</button>
+      <button class="tool-btn" onclick="wrap('*','*')" title="Italic" style="font-style:italic">I</button>
+      <button class="tool-btn" onclick="wrap('~~','~~')" title="Strikethrough"style="text-decoration: line-through;">S</button>
+      <button class="tool-btn" onclick="wrap('_','_')" title="Underline"><u>U</u></button>
+      <button class="tool-btn" onclick="wrap('`','`')" title="Inline code">&lt;/&gt;</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="insertLine('## ')" title="Heading">H2</button>
+      <button class="tool-btn" onclick="insertLine('### ')" title="Subheading">H3</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="insertLine('- ')" title="List item">—</button>
+      <button class="tool-btn" onclick="insertLine('> ')" title="Blockquote">"</button>
+      <button class="tool-btn" onclick="insertCodeBlock()" title="Code block">{ }</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="insertWikiLink()" title="Link to note">[[]]</button>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-edit" onclick="setMode('edit')">edit</button>
+        <button class="mode-btn" id="mode-split" onclick="setMode('split')">split</button>
+        <button class="mode-btn" id="mode-preview" onclick="setMode('preview')">preview</button>
+      </div>
+    </div>
+
+    <div class="split-view">
+      <div class="editor-pane full" id="editor-pane">
+        <input class="note-title-input" id="note-title" type="text" placeholder="note title..." oninput="onTitleChange()">
+        <textarea class="editor-textarea" id="editor" placeholder="start writing... use [[note name]] to link to other notes" oninput="onEditorChange()"></textarea>
+      </div>
+      <div class="preview-pane" id="preview-pane"></div>
+    </div>
+  </div>
+
+  <div class="links-panel">
+    <div class="links-header">linked notes</div>
+    <div class="links-list" id="links-list">
+      <div class="empty-state">links to other notes will appear here as you write [[note name]]</div>
+    </div>
+  </div>
+</div>
+
+<div class="statusbar">
+  <span class="status-item">words: <span id="word-count">0</span></span>
+  <span class="status-item">chars: <span id="char-count">0</span></span>
+  <span class="status-item">links: <span id="link-count">0</span></span>
+  <span class="wiki-link-hint">>_Hint: <code>Let's all love Lain</code> | link syntax: <code>[[note name]]</code></span>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="graphview.js"></script>
+<script src="scripts.js"></script>
+</body>
+</html>
