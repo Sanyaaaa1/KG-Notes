@@ -1,0 +1,9 @@
+{
+    "N1779272593055d9nd": {
+        "id": "N1779272593055d9nd",
+        "title": "Welcome",
+        "content": "## Getting started\n\nThis is your knowledge graph notes editor.\n\nLink notes together using `[[note name]]` syntax \u2014 just like Obsidian.\n\n- Write in **markdown**\n- Link with `[[double brackets]]`\n- Switch to *split* or *preview* mode to render\n\n> Linked notes appear in the panel on the right. Click a link to navigate, or create the note if it doesn't exist yet.\n\n```python\n# your notes become graph nodes\n# [[links]] become edges\n``` \n press ctrl/cmd + g for fun, ctrl/cmd + h to stop it.\n\nHappy noting!",
+        "created": 1779272593055,
+        "updated": 1779272593055
+    }
+}

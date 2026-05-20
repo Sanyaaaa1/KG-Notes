@@ -20,7 +20,7 @@ app.add_middleware(
 app.include_router(notes.notes_router, prefix="/api")
 app.include_router(fetch.fetch_router, prefix="/api")
 # Mount static files
-app.mount("/", StaticFiles(directory="../main", html=True), name="static")
+app.mount("/", StaticFiles(directory="./main", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
